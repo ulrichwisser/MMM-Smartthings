@@ -101,7 +101,7 @@ Module.register("MMM-Smartthings", {
 		const deviceKeys = Object.keys(this.deviceStatuses) || [];
 		wrapper.innerHTML = `
       <span class="title">${this.config.title}</span>
-      <ul class="sensors">
+      <div class="sensors">
         ${deviceKeys
 			.map(sensorKey => {
 				const device = this.deviceStatuses[sensorKey];
@@ -139,16 +139,18 @@ Module.register("MMM-Smartthings", {
 				
 				
 				return `
-                <li class="sensor ${rowClass}">
-                  <span class="sensor-icon ${device.deviceType}"></span>
-                  <span class="sensor-name">${device.deviceName}</span>
-                  <span class="sensor-status-icon ${iconClass}"></span>
-                  <span class="sensor-status-name">${device.value}</span>
-                </li>
+                <div class="sensor ${rowClass}">
+                  <div class="top">
+                    <div class="sensor-status-icon ${iconClass}"></div>
+                    <div class="sensor-name">${device.deviceName}
+                      <small>${device.value}</small>
+                    </div>
+                  </div>
+                </div>
             `;
 			})
 			.join('')}
-		  </ul>
+		  </div>
 		`;
 		return wrapper;
 	},
