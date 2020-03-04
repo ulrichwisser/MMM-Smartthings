@@ -121,7 +121,7 @@ Module.register("MMM-Smartthings", {
 					rowClass = `${rowClass} ok`;
 				} else if (device.deviceType === 'temperatureMeasurement') {
 					if (device.value <= this.config.tempLowValue) {
-						iconClass = `sensor-temp-low fa fa-thermometer-empty`;	
+						iconClass = `sensor-temp-low fa fa-thermometer-empty`;
 					} else if (device.value >= this.config.tempHighValue) {
 						iconClass = `sensor-temp-high fa fa-thermometer-full`;
 					} else {
@@ -136,8 +136,8 @@ Module.register("MMM-Smartthings", {
 						iconClass = `${iconClass} zmdi-run`;
 					}
 				}
-				
-				
+
+
 				return `
                 <div class="sensor ${rowClass}">
                   <div class="top">
@@ -214,8 +214,7 @@ Module.register("MMM-Smartthings", {
 
 		//messages to display in console from node_helper and other backend processes.
 		if (notification === "ConsoleOutput") {
-			console.log("OUTPUT_LOG:");
-			console.log(payload);
+			console.log("MMM-Smartthings: " + payload);
 		}
 	}
 });
