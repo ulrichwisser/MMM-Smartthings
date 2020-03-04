@@ -100,10 +100,9 @@ Module.register("MMM-Smartthings", {
 
 		const deviceKeys = Object.keys(this.deviceStatuses) || [];
 		wrapper.innerHTML = `
-      <span class="title">${this.config.title}</span>
-      <div class="sensors">
-        ${deviceKeys
-			.map(sensorKey => {
+			<span class="title">${this.config.title}</span>
+			<div class="sensors">
+				${deviceKeys.map(sensorKey => {
 				const device = this.deviceStatuses[sensorKey];
 				let iconClass = 'zmdi';
 				let rowClass = '';
@@ -114,7 +113,7 @@ Module.register("MMM-Smartthings", {
 					iconClass = `${iconClass} zmdi-lock-open`;
 					rowClass = `${rowClass} error`;
 				} else if (device.value === 'on') {
-					iconClass = `${iconClass} zmdi-power`;
+					ionClass = `${iconClass} zmdi-power`;
 					rowClass = `${rowClass} error`;
 				} else if (device.value === 'off') {
 					iconClass = `${iconClass} zmdi-minus-circle-outline`;
@@ -136,21 +135,18 @@ Module.register("MMM-Smartthings", {
 						iconClass = `${iconClass} zmdi-run`;
 					}
 				}
-
-
 				return `
-                <div class="sensor ${rowClass}">
-                  <div class="top">
-                    <div class="sensor-status-icon ${iconClass}"></div>
-                    <div class="sensor-name">${device.deviceName}
-                      <small>${device.value}</small>
-                    </div>
-                  </div>
-                </div>
-            `;
-			})
-			.join('')}
-		  </div>
+        			<div class="sensor ${rowClass}">
+          				<div class="top">
+        					<div class="sensor-status-icon ${iconClass}"></div>
+							<div class="sensor-name">${device.deviceName}
+								<small>${device.value}</small>
+        					</div>
+          				</div>
+        			</div>
+   				`;
+				}).join('')}
+		  	</div>
 		`;
 		return wrapper;
 	},
