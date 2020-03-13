@@ -30,6 +30,11 @@
     line-height: 0.7em;
 }
 
+.sensors .title {
+    display: block;
+    width: 100%;
+}
+
 .sensors .sensor {
 /*
     text-align: left;
@@ -58,6 +63,12 @@
     padding: 0 15px;
     box-sizing: border-box;
     color: #aaa;
+}
+
+.sensors .sensor.summary {
+    display: block;
+    width: 100%;
+    text-align: center;
 }
 
 .sensor-name {

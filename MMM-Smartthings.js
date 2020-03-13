@@ -41,8 +41,9 @@ Module.register("MMM-Smartthings", {
 		this.loaded = false;
 		this.sendConfig();
 		this.getData();
+
 		// Schedule update timer.
-		this.scheduleUpdate(2000);
+		this.scheduleUpdate(2000); // 2000 = 2s
 	},
 
 	sendConfig: function() {
@@ -80,12 +81,20 @@ Module.register("MMM-Smartthings", {
 		}, nextLoad);
 	},
 
+	// output dom object
+	// create a list of statuses for each device type
+	//
 	getDom: function() {
 		let self = this;
-		const wrapper = document.createElement('div');
+
+		// this is our dom  object wrapper
+        const wrapper = document.createElement('div');
+		wrapper.id = 'MMM-Smartthings2';
+		wrapper.className = 'sensors';
+
+		// check if we do have device statuses
 		if (this.deviceStatuses === null || this.deviceStatuses.length === 0) {
-			wrapper.innerHTML =
-				'<div class="loading"><span class="zmdi zmdi-rotate-right zmdi-hc-spin"></span> Loading...</div>';
+			wrapper.innerHTML =	'<div class="loading"><span class="zmdi zmdi-rotate-right zmdi-hc-spin"></span> Loading...</div>';
 
 			//retry ui update in a few seconds, data may still be loading
 			setTimeout(function() {
@@ -95,60 +104,142 @@ Module.register("MMM-Smartthings", {
 			return wrapper;
 		}
 
+		// list of devices sorted by name
+		// (this will make devices appear name sorted on screen)
 		this.deviceStatuses = this.deviceStatuses.sort(this.compareDeviceNames); //sort device names
-		this.deviceStatuses = this.deviceStatuses.sort(this.compareDeviceTypes); //sort by device types
 
-		const deviceKeys = Object.keys(this.deviceStatuses) || [];
-		wrapper.innerHTML = `
-			<span class="title">${this.config.title}</span>
-			<div class="sensors">
-				${deviceKeys.map(sensorKey => {
-				const device = this.deviceStatuses[sensorKey];
-				let iconClass = 'zmdi';
-				let rowClass = '';
-				if (device.value === 'locked' || device.value === 'closed') {
-					iconClass = `${iconClass} zmdi-lock`;
-					rowClass = `${rowClass} ok`;
-				} else if (device.value === 'unlocked' || device.value === 'open') {
-					iconClass = `${iconClass} zmdi-lock-open`;
-					rowClass = `${rowClass} error`;
-				} else if (device.value === 'on') {
-					ionClass = `${iconClass} zmdi-power`;
-					rowClass = `${rowClass} error`;
-				} else if (device.value === 'off') {
-					iconClass = `${iconClass} zmdi-minus-circle-outline`;
-					rowClass = `${rowClass} ok`;
-				} else if (device.deviceType === 'temperatureMeasurement') {
-					if (device.value <= this.config.tempLowValue) {
-						iconClass = `sensor-temp-low fa fa-thermometer-empty`;
-					} else if (device.value >= this.config.tempHighValue) {
-						iconClass = `sensor-temp-high fa fa-thermometer-full`;
-					} else {
-						iconClass = `sensor-temp fa fa-thermometer-half`;
-					}
-				} else if (device.deviceType === 'relativeHumidityMeasurement') {
-					iconClass = `${iconClass} zmdi-grain`;
-				} else if (device.deviceType === 'motionSensor') {
-					if(device.value === 'active') {
-						iconClass = `sensor-motion ${iconClass} zmdi-run`;
-					} else {
-						iconClass = `${iconClass} zmdi-run`;
-					}
+		// get all device types
+		for (let i = 0; i < this.config.capabilities.length; i++) {
+			let capability = this.config.capabilities[i];
+			wrapper.innerHTML += `<span class="title">${self.getTitle(capability)}</span>`;
+
+			// count sensors
+			let sensorsCount = 0
+			let sensorsSkipped = 0;
+
+			// collect sensor html
+			let html = '';
+
+			// show device of current capability
+			for (let j=0; j < this.deviceStatuses.length; j++) {
+				let device = this.deviceStatuses[j];
+
+				// check device type
+				if (device.deviceType != capability) {
+					continue;
 				}
-				return `
-        			<div class="sensor ${rowClass}">
-          				<div class="top">
-        					<div class="sensor-status-icon ${iconClass}"></div>
-							<div class="sensor-name">${device.deviceName}
-								<small>${device.value}</small>
-        					</div>
-          				</div>
-        			</div>
-   				`;
-				}).join('')}
-		  	</div>
-		`;
+
+				// count sensors
+				sensorsCount++;
+
+				switch (device.deviceType) {
+					case 'contactSensor':
+						if (!this.config[capability].skipClosed || device.value == 'open')  {
+							html += self.getDeviceHTML(device);
+						} else {
+							sensorsSkipped++;
+						}
+						break;
+					case 'switch':
+					case 'lock':
+					case 'temperatureMeasurement':
+					case 'relativeHumidityMeasurement':
+					case 'motionSensor':
+					default:
+						html += self.getDeviceHTML(device);
+				};
+			}
+
+			// add to dom
+			wrapper.innerHTML += html;
+
+			// summary for skipped sensors
+			switch (capability) {
+				case 'contactSensor':
+					let msg = '';
+					if (sensorsSkipped == sensorsCount) {
+						msg = 'all';
+					} else if (sensorsSkipped > 0)  {
+						msg = 'part';
+					}
+					if (this.config[capability].summary[msg] !== undefined) {
+						wrapper.innerHTML += `<div class="sensor summary">${this.config[capability].summary[msg]}</div>`;
+					}
+					break;
+				case 'switch':
+				case 'lock':
+				case 'temperatureMeasurement':
+				case 'relativeHumidityMeasurement':
+				case 'motionSensor':
+				default:
+					break;
+			};
+		}
+
+		// done
 		return wrapper;
+	},
+
+	getTitle: function(capability) {
+		if (this.config[capability] === undefined || this.config[capability].title === undefined) {
+			return capability;
+		}
+		return this.config[capability].title;
+	},
+
+	getSummary: function(capability, msg) {
+		if (this.config[capability].summary[msg] === undefined) {
+			return `All other ${this.getTitle(capabbility)} are `;
+		}
+		return this.config[capability].summary[msg];
+	},
+
+	getDeviceHTML(device) {
+		let iconClass = 'zmdi';
+		let rowClass = '';
+		if (device.value === 'locked' || device.value === 'closed') {
+			iconClass = `${iconClass} zmdi-lock`;
+			rowClass = `${rowClass} ok`;
+		} else if (device.value === 'unlocked' || device.value === 'open') {
+			iconClass = `${iconClass} zmdi-lock-open`;
+			rowClass = `${rowClass} error`;
+		} else if (device.value === 'on') {
+			ionClass = `${iconClass} zmdi-power`;
+			rowClass = `${rowClass} error`;
+		} else if (device.value === 'off') {
+			iconClass = `${iconClass} zmdi-minus-circle-outline`;
+			rowClass = `${rowClass} ok`;
+		} else if (device.deviceType === 'temperatureMeasurement') {
+			if (device.value <= this.config.tempLowValue) {
+				iconClass = `sensor-temp-low fa fa-thermometer-empty`;
+			} else if (device.value >= this.config.tempHighValue) {
+				iconClass = `sensor-temp-high fa fa-thermometer-full`;
+			} else {
+				iconClass = `sensor-temp fa fa-thermometer-half`;
+			}
+		} else if (device.deviceType === 'relativeHumidityMeasurement') {
+			iconClass = `${iconClass} zmdi-grain`;
+		} else if (device.deviceType === 'motionSensor') {
+			if(device.value === 'active') {
+				iconClass = `sensor-motion ${iconClass} zmdi-run`;
+			} else {
+				iconClass = `${iconClass} zmdi-run`;
+			}
+		}
+
+		let html = `
+			<div class="sensor ${rowClass}">
+				<div class="top">
+					<div class="sensor-status-icon ${iconClass}"></div>
+						<div class="sensor-name">${device.deviceName}
+							<small>${device.value}</small>
+						</div>
+  					</div>
+				</div>
+		`;
+
+		// done
+		return html;
 	},
 
 	compareDeviceNames: function (a, b) {
@@ -191,15 +282,6 @@ Module.register("MMM-Smartthings", {
 			'https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css',
 			"MMM-Smartthings.css",
 		];
-	},
-
-	// Load translations files
-	getTranslations: function() {
-		//FIXME: This can be load a one file javascript definition
-		return {
-			en: "translations/en.json",
-			es: "translations/es.json"
-		};
 	},
 
 	// socketNotificationReceived from helper
