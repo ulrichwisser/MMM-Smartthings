@@ -77,7 +77,6 @@ module.exports = NodeHelper.create({
 				case 'motionSensor':
 					statusType = deviceStatus.motion.value;
 					break;
-
 			}
 
 			if (!this.isDeviceNameExcluded(device.label)) {
