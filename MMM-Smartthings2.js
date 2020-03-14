@@ -7,7 +7,7 @@
  * MIT Licensed.
  */
 
-Module.register("MMM-Smartthings", {
+Module.register("MMM-Smartthings2", {
 	deviceStatuses: [],
 
 	defaults: {
@@ -277,7 +277,7 @@ Module.register("MMM-Smartthings", {
 		return [
 			'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
 			'https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css',
-			"MMM-Smartthings.css",
+			"MMM-Smartthings2.css",
 		];
 	},
 
@@ -289,7 +289,7 @@ Module.register("MMM-Smartthings", {
 
 		//messages to display in console from node_helper and other backend processes.
 		if (notification === "ConsoleOutput") {
-			console.log("MMM-Smartthings: " + payload);
+			console.log("MMM-Smartthings2: " + payload);
 		}
 	}
 });
