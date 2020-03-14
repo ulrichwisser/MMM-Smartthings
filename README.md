@@ -1,4 +1,4 @@
-# MMM-Smartthings
+# MMM-Smartthings2
 
 This is a module for the [MagicMirror²](https://github.com/MichMich/MagicMirror/).
 
@@ -23,8 +23,8 @@ Additionally all sensor types are now listed as their own category. This has for
 ### Setup the MagicMirror module
 ```bash
 cd ~/MagicMirror/modules
-git clone https://github.com/ulrichwisser/MMM-Smartthings.git
-cd MMM-Smartthings
+git clone https://github.com/ulrichwisser/MMM-Smartthings2.git
+cd MMM-Smartthings2
 npm install
 ```
 
@@ -35,7 +35,7 @@ To use this module, add the following configuration block to the modules array i
 var config = {
     modules: [
         {
-              module: "MMM-Smartthings",
+              module: "MMM-Smartthings2",
               position: "top_left",
               header: "Smartthings",
               config: {
